@@ -1,0 +1,20 @@
+{
+    "name": "CinematicEffect",
+    "rootNamespace": "Void2610.CinematicEffect",
+    "references": [
+        "UniTask",
+        "LitMotion",
+        "LitMotion.Extensions",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,28 @@
+{
+  "name": "com.void2610.cinematic-effect",
+  "version": "0.1.0",
+  "displayName": "CinematicEffect",
+  "description": "コードから宣言的に演出を再生する Unity 向けシネマティックエフェクト集。画面フェード / フラッシュ / レターボックス / カメラシェイク / ポストプロセス (Vignette 等) / URP RendererFeature ベースの歪み・ブラー効果を、シーンへの事前配置なしに UniTask + LitMotion で再生できる。CinematicSequenceAsset による演出のアセット化と Director / Editor プレビューに対応。",
+  "unity": "6000.3",
+  "license": "MIT",
+  "documentationUrl": "https://github.com/void2610/cinematic-effect",
+  "changelogUrl": "https://github.com/void2610/cinematic-effect/blob/main/Assets/CinematicEffect/CHANGELOG.md",
+  "licensesUrl": "https://github.com/void2610/cinematic-effect/blob/main/Assets/CinematicEffect/LICENSE.md",
+  "keywords": [
+    "cinematic",
+    "effect",
+    "camera-shake",
+    "post-processing",
+    "urp",
+    "unitask",
+    "litmotion"
+  ],
+  "author": {
+    "name": "void2610",
+    "url": "https://github.com/void2610"
+  },
+  "dependencies": {
+    "com.unity.ugui": "2.0.0",
+    "com.unity.render-pipelines.universal": "17.0.0"
+  }
+}

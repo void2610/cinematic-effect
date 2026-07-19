@@ -1,0 +1,20 @@
+{
+    "name": "CinematicEffect.Editor",
+    "rootNamespace": "Void2610.CinematicEffect.Editor",
+    "references": [
+        "CinematicEffect",
+        "LitMotion",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

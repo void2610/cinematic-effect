@@ -1,0 +1,56 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Ee]xported[Oo]bj/
+[Oo]utputs/
+.[Cc]onsulo/
+*.csproj
+*.unityproj
+*.sln
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.user
+*.tmp
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+sysinfo.txt
+crashlytics-build.properties
+
+# Unity ビルド成果物
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Unity Addressables（自動生成キャッシュ）
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+/[Aa]ssets/[Aa]ssetStoreTools*
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# JetBrains / VS / Rider
+.idea/
+.vs/
+.vscode/
+
+# NuGet (for Unity NuGet)
+Assets/Packages/
+
+# uloop CLI のローカルキャッシュ / 出力
+/.uloop/
