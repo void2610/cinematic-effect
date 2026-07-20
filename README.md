@@ -23,6 +23,8 @@ Package Manager の *Add package from git URL...* に以下を指定:
 https://github.com/void2610/cinematic-effect.git?path=Assets/CinematicEffect
 ```
 
+バージョンを固定したい場合は URL 末尾に `#<コミットSHA>` を付けてピン留めする (更新は SHA の付け替え)。
+
 ### 依存パッケージ
 
 以下は git URL 依存のため自動解決されない。利用側プロジェクトの `Packages/manifest.json` に追加すること:
