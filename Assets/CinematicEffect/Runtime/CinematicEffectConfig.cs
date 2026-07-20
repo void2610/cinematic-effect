@@ -668,19 +668,29 @@ namespace Void2610.CinematicEffect
     public sealed class RadialMonochromeConfig : HoldableEffectConfig
     {
         [SerializeField] private float softness = 0.12f;
+        [SerializeField] private Texture2D maskTexture;
+        [SerializeField] private float maskStrength;
 
         /// <summary>カラー/白黒の境界のぼかし幅。</summary>
         public float Softness => softness;
 
+        /// <summary>境界を歪ませるマスクテクスチャ (R チャンネル使用)。未設定なら真円のまま。</summary>
+        public Texture2D MaskTexture => maskTexture;
+
+        /// <summary>MaskTexture による境界の歪み量。0 なら MaskTexture を設定しても真円のまま。</summary>
+        public float MaskStrength => maskStrength;
+
         // EnterDuration=色が広がる時間, HoldDuration=保持, ExitDuration=白黒へ収縮する時間
         public RadialMonochromeConfig() : base(0.25f, 1.2f, Ease.InOutSine, 0.1f, true) { }
 
-        public RadialMonochromeConfig(float softness, float enterDuration, float holdDuration, float exitDuration, Ease ease)
-            : base(enterDuration, exitDuration, ease, holdDuration, true)
+        public RadialMonochromeConfig(float softness, float enterDuration, float holdDuration, float exitDuration, Ease ease, bool autoComplete = true, Texture2D maskTexture = null, float maskStrength = 0f)
+            : base(enterDuration, exitDuration, ease, holdDuration, autoComplete)
         {
             this.softness = softness;
+            this.maskTexture = maskTexture;
+            this.maskStrength = maskStrength;
         }
 
-        public override CinematicEffectConfig Clone() => new RadialMonochromeConfig(softness, EnterDuration, HoldDuration, ExitDuration, Ease);
+        public override CinematicEffectConfig Clone() => new RadialMonochromeConfig(softness, EnterDuration, HoldDuration, ExitDuration, Ease, AutoComplete, maskTexture, maskStrength);
     }
 }

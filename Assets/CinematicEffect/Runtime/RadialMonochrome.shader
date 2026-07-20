@@ -18,10 +18,14 @@ Shader "Hidden/CinematicEffect/RadialMonochrome"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
+            TEXTURE2D(_MaskTex);
+            SAMPLER(sampler_MaskTex);
+
             float _Radius;      // カラー域の半径 (0=全画面白黒)
             float _Softness;    // 境界のぼかし幅
             float2 _Center;     // マスク中心 (UV)
             float _Aspect;      // width/height (円形補正)
+            float _MaskStrength; // _MaskTex による境界の歪み量 (0=真円のまま)
 
             half4 Frag(Varyings input) : SV_Target
             {
@@ -31,6 +35,10 @@ Shader "Hidden/CinematicEffect/RadialMonochrome"
                 float2 d = uv - _Center;
                 d.x *= _Aspect;
                 float dist = length(d);
+
+                // _MaskTex の R チャンネルで境界半径を揺らし、真円ではなく有機的な収縮エッジにする
+                float mask = SAMPLE_TEXTURE2D_X(_MaskTex, sampler_MaskTex, uv).r;
+                dist += (mask - 0.5) * _MaskStrength;
 
                 // 半径の内側 (dist<_Radius) は 0=カラー、外側は 1=白黒へ滑らかに遷移
                 float mono = smoothstep(_Radius - _Softness, _Radius, dist);
