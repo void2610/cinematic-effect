@@ -36,6 +36,7 @@ namespace Void2610.CinematicEffect.Editor
         private const string PROP_CAMERA_PERLIN_SHAKE_CONFIG = "cameraPerlinShakeConfig";
         private const string PROP_COLOR_GRADE_CONFIG = "colorGradeConfig";
         private const string PROP_VISION_WARP_CONFIG = "visionWarpConfig";
+        private const string PROP_RADIAL_MONOCHROME_CONFIG = "radialMonochromeConfig";
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -104,6 +105,7 @@ namespace Void2610.CinematicEffect.Editor
                 CinematicSequenceAsset.EffectKind.CameraPerlinShake => PROP_CAMERA_PERLIN_SHAKE_CONFIG,
                 CinematicSequenceAsset.EffectKind.ColorGrade => PROP_COLOR_GRADE_CONFIG,
                 CinematicSequenceAsset.EffectKind.VisionWarp => PROP_VISION_WARP_CONFIG,
+                CinematicSequenceAsset.EffectKind.RadialMonochrome => PROP_RADIAL_MONOCHROME_CONFIG,
                 _ => null,
             };
 
