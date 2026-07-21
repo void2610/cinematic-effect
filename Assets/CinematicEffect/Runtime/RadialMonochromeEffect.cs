@@ -83,7 +83,9 @@ namespace Void2610.CinematicEffect
             // Play 側の広がり切った半径から、ゆっくり白黒へ収縮させる
             var from = _material.GetFloat(RadiusId);
             await AnimateRadiusAsync(from, 0f, CurrentConfig.ExitDuration, CurrentConfig.Ease, ct);
-            OnResetImmediate();
+            _material.SetFloat(MaskStrengthId, 0f);
+            // radius 0 は全画面白黒。収縮直後に Active を落とすと素のカラー映像が露出するため、止めるのは収縮量ゼロで再 Stop されたとき (色を戻す側) だけ
+            if (from <= 0.0001f) RadialMonochromeRendererFeature.Active = false;
         }
 
         protected override void OnResetImmediate()
