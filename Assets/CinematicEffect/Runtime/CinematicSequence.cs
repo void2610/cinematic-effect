@@ -26,12 +26,22 @@ namespace Void2610.CinematicEffect
             Delay,
         }
 
-        /// <summary>シーケンスの1ステップ。</summary>
-        internal readonly record struct Step(
-            StepKind Kind,
-            Type EffectType = null,
-            float DelaySeconds = 0f,
-            CinematicEffectConfig Config = null);
+        /// <summary>シーケンスの1ステップ。record struct は C# 10 構文で Unity (C# 9) でコンパイルできないため使わない。</summary>
+        internal readonly struct Step
+        {
+            public StepKind Kind { get; }
+            public Type EffectType { get; }
+            public float DelaySeconds { get; }
+            public CinematicEffectConfig Config { get; }
+
+            public Step(StepKind kind, Type effectType = null, float delaySeconds = 0f, CinematicEffectConfig config = null)
+            {
+                Kind = kind;
+                EffectType = effectType;
+                DelaySeconds = delaySeconds;
+                Config = config;
+            }
+        }
 
         private readonly List<Step> _steps = new();
 
@@ -43,49 +53,49 @@ namespace Void2610.CinematicEffect
         /// <summary>演出を Fire-and-Forget で開始する（ループ型エフェクト向け）。</summary>
         public CinematicSequence Play<T>(CinematicEffectConfig config = null) where T : class, ICinematicEffect
         {
-            _steps.Add(new Step(StepKind.Play, typeof(T), Config: config));
+            _steps.Add(new Step(StepKind.Play, typeof(T), config: config));
             return this;
         }
 
         /// <summary>演出を開始し、完了を待機する（1回完結型エフェクト向け）。</summary>
         public CinematicSequence PlayAndAwait<T>(CinematicEffectConfig config = null) where T : class, ICinematicEffect
         {
-            _steps.Add(new Step(StepKind.PlayAndAwait, typeof(T), Config: config));
+            _steps.Add(new Step(StepKind.PlayAndAwait, typeof(T), config: config));
             return this;
         }
 
         /// <summary>演出を停止し、停止アニメーションの完了を待機する。</summary>
         public CinematicSequence Stop<T>(CinematicEffectConfig config = null) where T : class, ICinematicEffect
         {
-            _steps.Add(new Step(StepKind.Stop, typeof(T), Config: config));
+            _steps.Add(new Step(StepKind.Stop, typeof(T), config: config));
             return this;
         }
 
         /// <summary>演出を Fire-and-Forget で開始する（ランタイム型解決用）。</summary>
         public CinematicSequence Play(Type effectType, CinematicEffectConfig config = null)
         {
-            _steps.Add(new Step(StepKind.Play, effectType, Config: config));
+            _steps.Add(new Step(StepKind.Play, effectType, config: config));
             return this;
         }
 
         /// <summary>演出を開始し、完了を待機する（ランタイム型解決用）。</summary>
         public CinematicSequence PlayAndAwait(Type effectType, CinematicEffectConfig config = null)
         {
-            _steps.Add(new Step(StepKind.PlayAndAwait, effectType, Config: config));
+            _steps.Add(new Step(StepKind.PlayAndAwait, effectType, config: config));
             return this;
         }
 
         /// <summary>演出を停止し、停止アニメーションの完了を待機する（ランタイム型解決用）。</summary>
         public CinematicSequence Stop(Type effectType, CinematicEffectConfig config = null)
         {
-            _steps.Add(new Step(StepKind.Stop, effectType, Config: config));
+            _steps.Add(new Step(StepKind.Stop, effectType, config: config));
             return this;
         }
 
         /// <summary>指定秒数だけ待機する。</summary>
         public CinematicSequence Delay(float seconds)
         {
-            _steps.Add(new Step(StepKind.Delay, DelaySeconds: seconds));
+            _steps.Add(new Step(StepKind.Delay, delaySeconds: seconds));
             return this;
         }
 
