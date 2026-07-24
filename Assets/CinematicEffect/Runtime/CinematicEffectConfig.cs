@@ -476,20 +476,30 @@ namespace Void2610.CinematicEffect
     {
         [SerializeField] private Color tintColor = Color.white;
         [SerializeField] private float holdDuration;
+        [SerializeField] private Sprite sprite;
+        [SerializeField] private bool preserveAspect;
 
         public Color TintColor => tintColor;
         public float HoldDuration => holdDuration;
 
+        /// <summary>表示するスプライト。null ならソリッドカラーのフラッシュ。</summary>
+        public Sprite Sprite => sprite;
+
+        /// <summary>スプライトのアスペクト比を維持するか。false なら全画面に引き伸ばす。</summary>
+        public bool PreserveAspect => preserveAspect;
+
         public ImageFlashConfig() { }
 
-        public ImageFlashConfig(Color tintColor, float enterDuration, float exitDuration, float holdDuration, Ease ease)
+        public ImageFlashConfig(Color tintColor, float enterDuration, float exitDuration, float holdDuration, Ease ease, Sprite sprite = null, bool preserveAspect = false)
             : base(enterDuration, exitDuration, ease)
         {
             this.tintColor = tintColor;
             this.holdDuration = holdDuration;
+            this.sprite = sprite;
+            this.preserveAspect = preserveAspect;
         }
 
-        public override CinematicEffectConfig Clone() => new ImageFlashConfig(tintColor, EnterDuration, ExitDuration, holdDuration, Ease);
+        public override CinematicEffectConfig Clone() => new ImageFlashConfig(tintColor, EnterDuration, ExitDuration, holdDuration, Ease, sprite, preserveAspect);
     }
 
     /// <summary>断続的な暗転（明滅ループ）演出の設定。</summary>

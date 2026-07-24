@@ -7,9 +7,9 @@ using UnityEngine.UI;
 namespace Void2610.CinematicEffect
 {
     /// <summary>
-    /// スプライト画像を全画面オーバーレイとしてフェードイン/アウトさせる演出。
-    /// <see cref="ScreenFadeEffect"/> がソリッドカラーで塗るのに対し、
-    /// あらかじめ Image コンポーネントに設定したスプライトをそのまま表示する。
+    /// 全画面オーバーレイをフェードイン → ホールド → フェードアウトさせるフラッシュ演出。
+    /// <see cref="ImageFlashConfig.Sprite"/> を指定すると任意のスプライト画像を全画面表示し、
+    /// 未指定なら <see cref="ImageFlashConfig.TintColor"/> のソリッドカラーで塗る。
     /// </summary>
     public sealed class ImageFlashEffect : ConfigurableCinematicEffectBase<ImageFlashConfig>
     {
@@ -32,6 +32,10 @@ namespace Void2610.CinematicEffect
         {
             _overlayImage.raycastTarget = false;
             _overlayImage.transform.SetAsLastSibling();
+
+            // Sprite 指定時は画像フラッシュ、未指定ならソリッドカラー
+            _overlayImage.sprite = CurrentConfig.Sprite;
+            _overlayImage.preserveAspect = CurrentConfig.PreserveAspect;
 
             // ティントカラーを適用してアルファを 0 から開始
             var color = CurrentConfig.TintColor;
@@ -69,6 +73,8 @@ namespace Void2610.CinematicEffect
             var color = _overlayImage.color;
             color.a = 0f;
             _overlayImage.color = color;
+            // オーバーレイ Image は ScreenFadeEffect と共有のため、スプライトを残さない
+            _overlayImage.sprite = null;
         }
     }
 }
