@@ -14,67 +14,79 @@ namespace Void2610.CinematicEffect
     public sealed class ImageFlashEffect : ConfigurableCinematicEffectBase<ImageFlashConfig>
     {
         public override string EffectName => "フラッシュ";
-        private readonly Image _overlayImage;
+
+        // null なら再生時に CinematicOverlay から Sprite の有無に応じて解決する
+        private readonly Image _customImage;
+        private Image _activeImage;
 
         /// <summary>
         /// オーバーレイ Image を自動取得するコンストラクタ。 <see cref="CinematicOverlay"/> が
         /// 必要な Canvas + Image をシーン上に自動生成するため、 事前配置は不要。
         /// </summary>
-        public ImageFlashEffect() : this(CinematicOverlay.Instance.Image) { }
+        public ImageFlashEffect() { }
 
         public ImageFlashEffect(Image overlayImage) : base()
         {
-            _overlayImage = overlayImage;
+            _customImage = overlayImage;
             OnResetImmediate();
         }
 
+        // Sprite 指定時はポストプロセスの掛かるカメラ空間オーバーレイに描き、ソリッドカラーは最前面オーバーレイに描く
+        private Image ResolveImage() =>
+            _customImage != null ? _customImage
+            : CurrentConfig.Sprite != null ? CinematicOverlay.Instance.CameraSpaceImage
+            : CinematicOverlay.Instance.Image;
+
         protected override async UniTask OnPlayAsync(CancellationToken ct)
         {
-            _overlayImage.raycastTarget = false;
-            _overlayImage.transform.SetAsLastSibling();
+            var image = _activeImage = ResolveImage();
+            image.raycastTarget = false;
+            image.transform.SetAsLastSibling();
 
             // Sprite 指定時は画像フラッシュ、未指定ならソリッドカラー
-            _overlayImage.sprite = CurrentConfig.Sprite;
-            _overlayImage.preserveAspect = CurrentConfig.PreserveAspect;
+            image.sprite = CurrentConfig.Sprite;
+            image.preserveAspect = CurrentConfig.PreserveAspect;
 
             // ティントカラーを適用してアルファを 0 から開始
             var color = CurrentConfig.TintColor;
             color.a = 0f;
-            _overlayImage.color = color;
+            image.color = color;
 
             // フェードイン → ホールド → フェードアウト
-            await _overlayImage.FadeIn(CurrentConfig.EnterDuration, CurrentConfig.Ease).ToUniTask(cancellationToken: ct);
+            await image.FadeIn(CurrentConfig.EnterDuration, CurrentConfig.Ease).ToUniTask(cancellationToken: ct);
 
             if (CurrentConfig.HoldDuration > 0f)
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(CurrentConfig.HoldDuration), cancellationToken: ct);
             }
 
-            await _overlayImage.FadeOut(CurrentConfig.ExitDuration, CurrentConfig.Ease).ToUniTask(cancellationToken: ct);
-            ResetAlpha();
+            await image.FadeOut(CurrentConfig.ExitDuration, CurrentConfig.Ease).ToUniTask(cancellationToken: ct);
+            ResetImage(image);
         }
 
         protected override async UniTask OnStopAsync(CancellationToken ct)
         {
-            await _overlayImage.FadeOut(CurrentConfig.ExitDuration, CurrentConfig.Ease).ToUniTask(cancellationToken: ct);
-            ResetAlpha();
+            var image = _activeImage != null ? _activeImage : ResolveImage();
+            await image.FadeOut(CurrentConfig.ExitDuration, CurrentConfig.Ease).ToUniTask(cancellationToken: ct);
+            ResetImage(image);
         }
 
         protected override void OnResetImmediate()
         {
-            if (_overlayImage == null) return;
+            var image = _activeImage != null ? _activeImage : _customImage;
+            if (image == null) return;
 
-            _overlayImage.raycastTarget = false;
-            ResetAlpha();
+            image.raycastTarget = false;
+            ResetImage(image);
         }
 
-        private void ResetAlpha()
+        private static void ResetImage(Image image)
         {
-            var color = _overlayImage.color;
+            var color = image.color;
             color.a = 0f;
-            _overlayImage.color = color;
+            image.color = color;
             // オーバーレイ Image は ScreenFadeEffect と共有のため、スプライトを残さない
-            _overlayImage.sprite = null;
+            image.sprite = null;
         }
     }
 }

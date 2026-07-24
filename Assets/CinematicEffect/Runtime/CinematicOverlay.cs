@@ -15,6 +15,8 @@ namespace Void2610.CinematicEffect
     {
         private Image _image;
         private Canvas _canvas;
+        private Image _cameraImage;
+        private Canvas _cameraCanvas;
 
         /// <summary>フェード / フラッシュの塗りつぶし対象となる全画面 Image。</summary>
         public Image Image
@@ -33,6 +35,25 @@ namespace Void2610.CinematicEffect
             {
                 if (_image == null) BuildOverlay();
                 return _canvas;
+            }
+        }
+
+        /// <summary>
+        /// ポストプロセスの影響を受けたい画像表示用の全画面 Image (ScreenSpaceCamera)。
+        /// ScreenSpaceOverlay の <see cref="Image"/> はポスト処理の後段に描かれるため、
+        /// グレイン / ビネット等を画像にも掛けたい場合はこちらを使う。 Camera.main が無ければ <see cref="Image"/> にフォールバック。
+        /// </summary>
+        public Image CameraSpaceImage
+        {
+            get
+            {
+                var camera = Camera.main;
+                if (camera == null) return Image;
+                if (_cameraImage == null) BuildCameraOverlay();
+                _cameraCanvas.worldCamera = camera;
+                // 手前の世界オブジェクトに遮蔽されないよう、可能な限りカメラ近くに置く
+                _cameraCanvas.planeDistance = camera.nearClipPlane + 0.1f;
+                return _cameraImage;
             }
         }
 
@@ -65,6 +86,27 @@ namespace Void2610.CinematicEffect
             _image = imgGo.GetComponent<Image>();
             _image.color = new Color(0f, 0f, 0f, 0f);
             _image.raycastTarget = false;
+        }
+
+        private void BuildCameraOverlay()
+        {
+            // ネストした Canvas は renderMode を上書きできないため、オーバーレイ Canvas の子ではなく独立ルートに作る
+            var go = new GameObject("CinematicOverlayCameraSpace", typeof(Canvas), typeof(CanvasScaler));
+            SceneManager.MoveGameObjectToScene(go, gameObject.scene);
+            _cameraCanvas = go.GetComponent<Canvas>();
+            _cameraCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+            _cameraCanvas.sortingOrder = short.MaxValue;
+
+            var imgGo = new GameObject("Image", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            imgGo.transform.SetParent(go.transform, false);
+            var rt = (RectTransform)imgGo.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            _cameraImage = imgGo.GetComponent<Image>();
+            _cameraImage.color = new Color(0f, 0f, 0f, 0f);
+            _cameraImage.raycastTarget = false;
         }
     }
 }
