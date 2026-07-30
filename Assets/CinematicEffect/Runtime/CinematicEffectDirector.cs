@@ -115,6 +115,9 @@ namespace Void2610.CinematicEffect
     #endif
         }
 
+        /// <summary>いずれかの演出の再生状態が変化したときに、その演出の型と新しい値で発火する。</summary>
+        public event Action<Type, bool> EffectPlayingChanged;
+
         /// <summary>指定した型の演出が再生中かを返す（観測用。未登録なら false）。</summary>
         public bool IsPlaying(Type effectType)
         {
@@ -207,7 +210,9 @@ namespace Void2610.CinematicEffect
         /// </summary>
         private void Register(ICinematicEffect effect)
         {
-            _effects[effect.GetType()] = effect;
+            var effectType = effect.GetType();
+            _effects[effectType] = effect;
+            effect.IsPlayingChanged += playing => EffectPlayingChanged?.Invoke(effectType, playing);
         }
 
         private void EnsureEffectsRegistered()
