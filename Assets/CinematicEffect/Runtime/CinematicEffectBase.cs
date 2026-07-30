@@ -13,7 +13,22 @@ namespace Void2610.CinematicEffect
     public abstract class CinematicEffectBase : ICinematicEffect, IDisposable
     {
         public abstract string EffectName { get; }
-        public bool IsPlaying { get; private set; }
+
+        /// <summary><see cref="IsPlaying"/> が変化したときに新しい値で発火する。ポーリングせず再生状態を追うために使う。</summary>
+        public event Action<bool> IsPlayingChanged;
+
+        public bool IsPlaying
+        {
+            get => _isPlaying;
+            private set
+            {
+                if (_isPlaying == value) return;
+                _isPlaying = value;
+                IsPlayingChanged?.Invoke(value);
+            }
+        }
+
+        private bool _isPlaying;
         private CancellationTokenSource _playingCts;
 
         /// <inheritdoc/>

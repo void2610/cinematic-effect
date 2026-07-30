@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
@@ -14,6 +15,9 @@ namespace Void2610.CinematicEffect
 
         /// <summary>演出再生中かどうか。</summary>
         public bool IsPlaying { get; }
+
+        /// <summary><see cref="IsPlaying"/> が変化したときに新しい値で発火する。</summary>
+        public event Action<bool> IsPlayingChanged;
 
         /// <summary>
         /// 演出を再生する。
