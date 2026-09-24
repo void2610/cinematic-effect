@@ -93,8 +93,9 @@ var seq = CinematicSequence.Create()
 | `RadialMonochromeEffect` | `RadialMonochromeConfig` | 円形にカラー ⇄ モノクロを遷移 |
 | `VisionWarpEffect` | `VisionWarpConfig` | 陽炎・酩酊感のある視界歪み |
 | `WaveDistortionEffect` | `WaveDistortionConfig` | 波打ち画面歪み |
+| `ScreenZoomEffect` * | `ScreenZoomConfig` | 描画後の画面を注視点へ寄せる (Screen Space - Camera の UI ごとカメラが寄って見える) |
 
-\* `RadialBlurEffect` は現状 `CinematicEffectDirector` に未登録のため、シーケンスから直接は再生できない (直接インスタンス化して利用する)。
+\* `RadialBlurEffect` / `ScreenZoomEffect` は現状 `CinematicEffectDirector` に未登録のため、シーケンスから直接は再生できない (直接インスタンス化して利用する)。
 
 ### PostProcess Volume 系 (Director にぶら下がる Volume を自動生成)
 

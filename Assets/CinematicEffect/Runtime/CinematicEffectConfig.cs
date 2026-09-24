@@ -609,6 +609,28 @@ namespace Void2610.CinematicEffect
         public override CinematicEffectConfig Clone() => new RadialBlurConfig(strength, center, EnterDuration, ExitDuration, Ease);
     }
 
+    /// <summary>画面ズームの設定。Center は注視点のビューポート座標 (0..1)、Zoom は最も寄ったときの拡大率。</summary>
+    [Serializable]
+    public sealed class ScreenZoomConfig : HoldableEffectConfig
+    {
+        [SerializeField] private float zoom = 1.06f;
+        [SerializeField] private Vector2 center = new(0.5f, 0.5f);
+
+        public float Zoom => zoom;
+        public Vector2 Center => center;
+
+        public ScreenZoomConfig() { }
+
+        public ScreenZoomConfig(float zoom, Vector2 center, float enterDuration, float exitDuration, Ease ease = Ease.InOutSine, float holdDuration = 0f, bool autoComplete = false)
+            : base(enterDuration, exitDuration, ease, holdDuration, autoComplete)
+        {
+            this.zoom = zoom;
+            this.center = center;
+        }
+
+        public override CinematicEffectConfig Clone() => new ScreenZoomConfig(zoom, center, EnterDuration, ExitDuration, Ease, HoldDuration, AutoComplete);
+    }
+
     /// <summary>彩度・カラーフィルター・コントラスト・露出をまとめて制御する汎用カラーグレード演出の設定。</summary>
     [Serializable]
     public sealed class ColorGradeConfig : VolumeEffectConfig
