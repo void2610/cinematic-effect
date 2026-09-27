@@ -96,7 +96,8 @@ namespace Void2610.CinematicEffect
                 switch (step.Kind)
                 {
                     case CinematicSequence.StepKind.Play:
-                        effect.PlayAsync(ct).Forget();
+                        // 待たずに残す演出は Stop まで保持する契約。呼び出し元の ct に繋ぐと見た目を残したまま IsPlaying だけ落ちる
+                        effect.PlayAsync(destroyCancellationToken).Forget();
                         break;
                     case CinematicSequence.StepKind.PlayAndAwait:
                         await effect.PlayAsync(ct);
