@@ -16,7 +16,7 @@ namespace Void2610.CinematicEffect
         public override string EffectName => "画面ズーム";
 
         private static readonly int ZoomId = Shader.PropertyToID("_Zoom");
-        private static readonly int CenterId = Shader.PropertyToID("_Center");
+        private static readonly int ViewCenterId = Shader.PropertyToID("_ViewCenter");
 
         private const string DefaultMaterialResourcePath = "ScreenZoom";
 
@@ -49,7 +49,6 @@ namespace Void2610.CinematicEffect
             // RendererFeature はレンダラ資産へ事前配置せず、初回再生時にコードで注入する (可搬性優先)
             CinematicRendererFeatureInjector.EnsureFeature<ScreenZoomRendererFeature>();
 
-            _material.SetVector(CenterId, CurrentConfig.Center);
             ScreenZoomRendererFeature.Active = true;
 
             await AnimateZoomAsync(_currentZoom, CurrentConfig.Zoom, CurrentConfig.EnterDuration, Ease.OutCubic, ct);
@@ -78,6 +77,7 @@ namespace Void2610.CinematicEffect
             if (_material == null) return;
             _currentZoom = 1f;
             _material.SetFloat(ZoomId, 1f);
+            _material.SetVector(ViewCenterId, new Vector2(0.5f, 0.5f));
             ScreenZoomRendererFeature.Active = false;
         }
 
@@ -96,6 +96,21 @@ namespace Void2610.CinematicEffect
         {
             _currentZoom = zoom;
             _material.SetFloat(ZoomId, zoom);
+            _material.SetVector(ViewCenterId, ViewCenterFor(zoom));
+        }
+
+        // 画面中央に映す位置。注視点を固定する寄りは C + (0.5 - C) / zoom、中央へ運ぶ寄りは拡大の進み具合で 0.5 から C へ移す
+        private Vector2 ViewCenterFor(float zoom)
+        {
+            var center = CurrentConfig.Center;
+            if (!CurrentConfig.BringToCenter) return center + (new Vector2(0.5f, 0.5f) - center) / Mathf.Max(zoom, 1f);
+
+            var peak = CurrentConfig.Zoom;
+            var progress = peak > 1f ? Mathf.Clamp01((zoom - 1f) / (peak - 1f)) : 1f;
+            var viewCenter = Vector2.Lerp(new Vector2(0.5f, 0.5f), center, progress);
+            // 見えている範囲の半分 (0.5 / zoom) より端へ寄せると画面外をサンプルして端の色が伸びるため収める
+            var half = 0.5f / Mathf.Max(zoom, 1f);
+            return new Vector2(Mathf.Clamp(viewCenter.x, half, 1f - half), Mathf.Clamp(viewCenter.y, half, 1f - half));
         }
     }
 }

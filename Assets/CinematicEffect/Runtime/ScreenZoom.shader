@@ -18,12 +18,12 @@ Shader "Hidden/CinematicEffect/ScreenZoom"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
 
-            float _Zoom;       // 拡大率 (1=等倍)
-            float2 _Center;    // 注視点 (UV)。注視点が 0..1 にある限り拡大後のサンプルも画面内に収まる
+            float _Zoom;         // 拡大率 (1=等倍)
+            float2 _ViewCenter;  // 画面中央に映す元画面の位置 (UV)。画面外をサンプルしない範囲へ収めるのは C# 側が担う
 
             half4 Frag(Varyings input) : SV_Target
             {
-                float2 uv = _Center + (input.texcoord - _Center) / max(_Zoom, 1.0);
+                float2 uv = _ViewCenter + (input.texcoord - 0.5) / max(_Zoom, 1.0);
                 return SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv);
             }
             ENDHLSL
