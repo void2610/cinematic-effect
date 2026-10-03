@@ -51,7 +51,7 @@ namespace Void2610.CinematicEffect
 
             ScreenZoomRendererFeature.Active = true;
 
-            await AnimateZoomAsync(_currentZoom, CurrentConfig.Zoom, CurrentConfig.EnterDuration, Ease.OutCubic, ct);
+            await AnimateZoomAsync(_currentZoom, CurrentConfig.Zoom, CurrentConfig.EnterDuration, CurrentConfig.EnterEase, ct);
 
             if (!CurrentConfig.AutoComplete)
             {

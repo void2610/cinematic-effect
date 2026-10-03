@@ -612,6 +612,7 @@ namespace Void2610.CinematicEffect
     /// <summary>
     /// 画面ズームの設定。Center は注視点のビューポート座標 (0..1)、Zoom は最も寄ったときの拡大率。
     /// BringToCenter=false は注視点を画面上の位置に留めたまま拡大し、true は寄るにつれて注視点を画面中央へ運ぶ。
+    /// EnterEase は寄りだけに効き、Ease は戻りに効く。
     /// </summary>
     [Serializable]
     public sealed class ScreenZoomConfig : HoldableEffectConfig
@@ -619,22 +620,26 @@ namespace Void2610.CinematicEffect
         [SerializeField] private float zoom = 1.06f;
         [SerializeField] private Vector2 center = new(0.5f, 0.5f);
         [SerializeField] private bool bringToCenter;
+        // 既定は最初の一瞬で大半を寄せる OutCubic。大きく寄るときは緩い曲線にしないと飛び込んで見える
+        [SerializeField] private Ease enterEase = Ease.OutCubic;
 
         public float Zoom => zoom;
         public Vector2 Center => center;
         public bool BringToCenter => bringToCenter;
+        public Ease EnterEase => enterEase;
 
         public ScreenZoomConfig() { }
 
-        public ScreenZoomConfig(float zoom, Vector2 center, float enterDuration, float exitDuration, Ease ease = Ease.InOutSine, float holdDuration = 0f, bool autoComplete = false, bool bringToCenter = false)
+        public ScreenZoomConfig(float zoom, Vector2 center, float enterDuration, float exitDuration, Ease ease = Ease.InOutSine, float holdDuration = 0f, bool autoComplete = false, bool bringToCenter = false, Ease enterEase = Ease.OutCubic)
             : base(enterDuration, exitDuration, ease, holdDuration, autoComplete)
         {
             this.zoom = zoom;
             this.center = center;
             this.bringToCenter = bringToCenter;
+            this.enterEase = enterEase;
         }
 
-        public override CinematicEffectConfig Clone() => new ScreenZoomConfig(zoom, center, EnterDuration, ExitDuration, Ease, HoldDuration, AutoComplete, bringToCenter);
+        public override CinematicEffectConfig Clone() => new ScreenZoomConfig(zoom, center, EnterDuration, ExitDuration, Ease, HoldDuration, AutoComplete, bringToCenter, enterEase);
     }
 
     /// <summary>彩度・カラーフィルター・コントラスト・露出をまとめて制御する汎用カラーグレード演出の設定。</summary>
