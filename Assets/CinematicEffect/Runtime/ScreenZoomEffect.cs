@@ -17,6 +17,8 @@ namespace Void2610.CinematicEffect
 
         private static readonly int ZoomId = Shader.PropertyToID("_Zoom");
         private static readonly int ViewCenterId = Shader.PropertyToID("_ViewCenter");
+        private static readonly int RotationId = Shader.PropertyToID("_Rotation");
+        private static readonly int AspectId = Shader.PropertyToID("_Aspect");
 
         private const string DefaultMaterialResourcePath = "ScreenZoom";
 
@@ -78,6 +80,8 @@ namespace Void2610.CinematicEffect
             _currentZoom = 1f;
             _material.SetFloat(ZoomId, 1f);
             _material.SetVector(ViewCenterId, new Vector2(0.5f, 0.5f));
+            _material.SetFloat(RotationId, 0f);
+            _material.SetFloat(AspectId, (float)Screen.width / Screen.height);
             ScreenZoomRendererFeature.Active = false;
         }
 
@@ -95,22 +99,56 @@ namespace Void2610.CinematicEffect
         private void SetZoom(float zoom)
         {
             _currentZoom = zoom;
-            _material.SetFloat(ZoomId, zoom);
-            _material.SetVector(ViewCenterId, ViewCenterFor(zoom));
+            var progress = Progress(zoom);
+            var angle = CurrentConfig.Rotation * progress * Mathf.Deg2Rad;
+            var aspect = (float)Screen.width / Screen.height;
+            // 回した分だけ画面の角が外へはみ出すので、外をサンプルしない拡大率まで底上げする
+            var sampleZoom = Mathf.Max(zoom, CoverZoom(angle, aspect));
+            _material.SetFloat(ZoomId, sampleZoom);
+            _material.SetFloat(RotationId, angle);
+            _material.SetFloat(AspectId, aspect);
+            _material.SetVector(ViewCenterId, ViewCenterFor(sampleZoom, progress, angle, aspect));
+        }
+
+        // 寄り切りを 1 とした拡大の進み具合。中央へ運ぶ寄りと回転はこれに合わせて進む
+        private float Progress(float zoom)
+        {
+            var peak = CurrentConfig.Zoom;
+            return peak > 1f ? Mathf.Clamp01((zoom - 1f) / (peak - 1f)) : 1f;
+        }
+
+        // 画面と同じ縦横比の窓を angle 回しても元画面に収まる最小の拡大率
+        private static float CoverZoom(float angle, float aspect)
+        {
+            var cos = Mathf.Abs(Mathf.Cos(angle));
+            var sin = Mathf.Abs(Mathf.Sin(angle));
+            return Mathf.Max(cos + sin / aspect, cos + sin * aspect);
         }
 
         // 画面中央に映す位置。注視点を固定する寄りは C + (0.5 - C) / zoom、中央へ運ぶ寄りは拡大の進み具合で 0.5 から C へ移す
-        private Vector2 ViewCenterFor(float zoom)
+        private Vector2 ViewCenterFor(float zoom, float progress, float angle, float aspect)
         {
             var center = CurrentConfig.Center;
-            if (!CurrentConfig.BringToCenter) return center + (new Vector2(0.5f, 0.5f) - center) / Mathf.Max(zoom, 1f);
+            var z = Mathf.Max(zoom, 1f);
+            if (!CurrentConfig.BringToCenter)
+            {
+                var fixedCenter = center + (new Vector2(0.5f, 0.5f) - center) / z;
+                // 回さなければ注視点を固定する寄りは元画面の内側しか映さない
+                if (Mathf.Approximately(angle, 0f)) return fixedCenter;
+                return ClampInside(fixedCenter, z, angle, aspect);
+            }
 
-            var peak = CurrentConfig.Zoom;
-            var progress = peak > 1f ? Mathf.Clamp01((zoom - 1f) / (peak - 1f)) : 1f;
-            var viewCenter = Vector2.Lerp(new Vector2(0.5f, 0.5f), center, progress);
-            // 見えている範囲の半分 (0.5 / zoom) より端へ寄せると画面外をサンプルして端の色が伸びるため収める
-            var half = 0.5f / Mathf.Max(zoom, 1f);
-            return new Vector2(Mathf.Clamp(viewCenter.x, half, 1f - half), Mathf.Clamp(viewCenter.y, half, 1f - half));
+            return ClampInside(Vector2.Lerp(new Vector2(0.5f, 0.5f), center, progress), z, angle, aspect);
+        }
+
+        private static Vector2 ClampInside(Vector2 viewCenter, float z, float angle, float aspect)
+        {
+            // 見えている範囲 (回転込みの外接矩形) の半分より端へ寄せると画面外をサンプルして端の色が伸びるため収める
+            var cos = Mathf.Abs(Mathf.Cos(angle));
+            var sin = Mathf.Abs(Mathf.Sin(angle));
+            var halfX = (cos + sin / aspect) * 0.5f / z;
+            var halfY = (cos + sin * aspect) * 0.5f / z;
+            return new Vector2(Mathf.Clamp(viewCenter.x, halfX, 1f - halfX), Mathf.Clamp(viewCenter.y, halfY, 1f - halfY));
         }
     }
 }
