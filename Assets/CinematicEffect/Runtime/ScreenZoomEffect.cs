@@ -25,6 +25,9 @@ namespace Void2610.CinematicEffect
         private readonly Material _material;
         private float _currentZoom = 1f;
 
+        /// <summary>いま画面を描いている拡大率 (回転による底上げ込み)。寄りに合わせて画面上の大きさを保ちたい要素の打ち消しに使う</summary>
+        public float CurrentMagnification { get; private set; } = 1f;
+
         // 連続で寄り直すとき、等倍へ飛ばずに今の拡大率から寄る
         protected override bool ResetVisualsOnReplay => false;
 
@@ -78,6 +81,7 @@ namespace Void2610.CinematicEffect
         {
             if (_material == null) return;
             _currentZoom = 1f;
+            CurrentMagnification = 1f;
             _material.SetFloat(ZoomId, 1f);
             _material.SetVector(ViewCenterId, new Vector2(0.5f, 0.5f));
             _material.SetFloat(RotationId, 0f);
@@ -104,6 +108,7 @@ namespace Void2610.CinematicEffect
             var aspect = (float)Screen.width / Screen.height;
             // 回した分だけ画面の角が外へはみ出すので、外をサンプルしない拡大率まで底上げする
             var sampleZoom = Mathf.Max(zoom, CoverZoom(angle, aspect));
+            CurrentMagnification = sampleZoom;
             _material.SetFloat(ZoomId, sampleZoom);
             _material.SetFloat(RotationId, angle);
             _material.SetFloat(AspectId, aspect);
