@@ -16,6 +16,7 @@ namespace Void2610.CinematicEffect
             typeof(UniversalRenderPipelineAsset).GetField("m_RendererDataList", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static readonly HashSet<System.Type> Injected = new();
+        private static readonly List<(ScriptableRendererData Data, ScriptableRendererFeature Feature)> InjectedFeatures = new();
 
         /// <summary>指定フィーチャが現在の URP レンダラ群に無ければ生成して追加する (一度きり)。SetDirty でレンダラを再生成させて反映する。</summary>
         public static void EnsureFeature<T>() where T : ScriptableRendererFeature
@@ -31,9 +32,10 @@ namespace Void2610.CinematicEffect
 
                 var feature = ScriptableObject.CreateInstance<T>();
                 feature.name = typeof(T).Name;
-                // 資産へ焼き込ませない (実行時のみの注入。エディタで誤って保存されても資産を汚さない)
+                // フィーチャ本体は資産へ焼き込ませない (リスト上の参照はエディタの Play 終了時に外す)
                 feature.hideFlags = HideFlags.HideAndDontSave;
                 data.rendererFeatures.Add(feature);
+                InjectedFeatures.Add((data, feature));
                 feature.Create();
                 data.SetDirty(); // レンダラ再生成を促し、追加フィーチャを反映させる
             }
@@ -50,5 +52,37 @@ namespace Void2610.CinematicEffect
 
             return false;
         }
+
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+        private static void RegisterPlayModeExit()
+        {
+            UnityEditor.EditorApplication.playModeStateChanged += state =>
+            {
+                if (state == UnityEditor.PlayModeStateChange.ExitingPlayMode) RemoveInjected();
+            };
+        }
+
+        // 残すと Play 後にレンダラ資産を保存した時、保存されないフィーチャが {fileID: 0} として焼き込まれる
+        private static void RemoveInjected()
+        {
+            foreach (var (data, feature) in InjectedFeatures)
+            {
+                if (data != null)
+                {
+                    data.rendererFeatures.Remove(feature);
+                    data.SetDirty();
+                }
+
+                if (feature == null) continue;
+                feature.Dispose();
+                Object.DestroyImmediate(feature);
+            }
+
+            InjectedFeatures.Clear();
+            // ドメインリロード無効の Play 入場では static が残るため、次の Play で注入し直せるよう消す
+            Injected.Clear();
+        }
+#endif
     }
 }
